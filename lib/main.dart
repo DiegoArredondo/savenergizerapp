@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
+import 'package:savenergizer/push_nofitications.dart';
 import 'package:savenergizer/responsive.dart';
 import 'package:savenergizer/usageData.dart';
 
@@ -46,6 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // AQUI DECLARAS NUEVAS VARIABLES SI LAS OCUPAS, COMO POR EJEMPLO
   //final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
   List<bool> portsStates = [false, false, false, false, false, false];
 
@@ -75,7 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
               });
             });
 
-            return mqttClient != null
+            return mqttClient == null
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -261,20 +264,22 @@ class _MyHomePageState extends State<MyHomePage> {
       client.disconnect();
     }
 
-    client.updates.listen((List<MqttReceivedMessage<MqttMessage>> c) {
-      final MqttPublishMessage message = c[0].payload;
-      final payload =
-          MqttPublishPayload.bytesToStringAsString(message.payload.message);
-      // payload = port2-off
-      print('!!!!!Received message: $payload from topic: ${c[0].topic}>');
-      int port = int.parse(payload.split("-")[0].split("t")[1]) - 1;
-      setState(() {
-        portsStates[port] =
-            payload.split("-")[1] == "on" || payload.split("-")[1] == "True";
-      });
-    }, onError: (error) => {print("Received error: " + error.toString())});
-
+    if (client != null){
+      client.updates.listen((List<MqttReceivedMessage<MqttMessage>> c) {
+        final MqttPublishMessage message = c[0].payload;
+        final payload =
+            MqttPublishPayload.bytesToStringAsString(message.payload.message);
+        // payload = port2-off
+        print('!!!!!Received message: $payload from topic: ${c[0].topic}>');
+        int port = int.parse(payload.split("-")[0].split("t")[1]) - 1;
+        setState(() {
+          portsStates[port] =
+              payload.split("-")[1] == "on" || payload.split("-")[1] == "True";
+        });
+      }, onError: (error) => {print("Received error: " + error.toString())});
+    }
     return client;
+
   }
 
   // connection succeeded
@@ -313,5 +318,7 @@ class _MyHomePageState extends State<MyHomePage> {
       connect().then((value) => setState(() => {mqttClient = value}));
     }
     // AQUI HAZ LO DE LAS NOTIFICACIONES
+    PushNotificationsManager().init();
   }
+
 }
