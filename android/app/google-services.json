@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "376941152754",
+    "firebase_url": "https://savenergizer.firebaseio.com",
+    "project_id": "savenergizer",
+    "storage_bucket": "savenergizer.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:376941152754:android:d323306c400daa7a91c36b",
+        "android_client_info": {
+          "package_name": "com.iot.savenergizer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "376941152754-ssap8t8mvtgpft7dbl4scoudt957v9on.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.iot.savenergizer",
+            "certificate_hash": "a2d7fe824c9cb99dde3beeae132d95c91236dfa3"
+          }
+        },
+        {
+          "client_id": "376941152754-p92g0qhso5jm9do0lrcp0qvmtotmt025.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEg9cP9EP4Z7mPcXg2Z3yWx5TrnG2SFQk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "376941152754-p92g0qhso5jm9do0lrcp0qvmtotmt025.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
