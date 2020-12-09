@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:savenergizer/alerts.dart';
 import 'package:savenergizer/responsive.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -82,6 +83,29 @@ class _DashboardPageState extends State<DashboardPage> {
                       // If pan/zoom is not added, the viewport specified remains the viewport.
                       behaviors: [new charts.PanAndZoomBehavior()],
                     )),
+                Container(
+                  height: resp.ip(5),
+                  width: resp.wp(50),
+                  child: RaisedButton(
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => AlertsPage(
+                                title: "Alertas",
+                              )));
+                    },
+                    child: Text(
+                      "Ver alertas",
+                      style: TextStyle(
+                          color: Colors.white, fontSize: resp.ip(2)),
+                    ),
+                    color: Colors.blueAccent,
+                    shape: RoundedRectangleBorder(
+                        borderRadius:
+                        BorderRadius.all(Radius.circular(10))),
+                  ),
+                )
               ],
             )
           : usageData.isEmpty && checkedForUsageData && sensorReadings.isEmpty && checkedForSensorReadings
