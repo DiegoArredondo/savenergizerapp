@@ -52,6 +52,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<bool> portsStates = [false, false, false, false, false, false];
 
+  var predictedTemp;
+
   @override
   Widget build(BuildContext context) {
     var resp = Responsive.of(context);
@@ -78,12 +80,20 @@ class _MyHomePageState extends State<MyHomePage> {
               });
             });
 
-            return mqttClient == null
+            return mqttClient != null
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        Container(
+                          child: Text(
+                            predictedTemp!=null ? "Temperatura predecida: $predictedTemp" : "",
+                            style: TextStyle(
+                                fontSize: resp.ip(1.5),
+                                color: Color.fromRGBO(100, 100, 100, 1)),
+                          ),
+                        ),
                         Container(
                           child: Text(
                             "Puertos:",
@@ -258,7 +268,7 @@ class _MyHomePageState extends State<MyHomePage> {
     try {
       await client.connect();
       client.subscribe("states", MqttQos.atLeastOnce);
-      //client.subscribe("data", MqttQos.atLeastOnce);
+      client.subscribe("inferences", MqttQos.atLeastOnce);
     } catch (e) {
       print('Exception: $e');
       client.disconnect();
@@ -266,16 +276,25 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (client != null){
       client.updates.listen((List<MqttReceivedMessage<MqttMessage>> c) {
-        final MqttPublishMessage message = c[0].payload;
-        final payload =
-            MqttPublishPayload.bytesToStringAsString(message.payload.message);
-        // payload = port2-off
-        print('!!!!!Received message: $payload from topic: ${c[0].topic}>');
-        int port = int.parse(payload.split("-")[0].split("t")[1]) - 1;
-        setState(() {
-          portsStates[port] =
-              payload.split("-")[1] == "on" || payload.split("-")[1] == "True";
-        });
+          final MqttPublishMessage message = c[0].payload;
+          final payload =
+          MqttPublishPayload.bytesToStringAsString(message.payload.message);
+          // payload = port2-off
+          print('!!!!!Received message: $payload from topic: ${c[0].topic}');
+
+          if(c[0].topic == "inferences"){
+            setState(() {
+              predictedTemp = payload;
+            });
+          }
+          else if(c[0].topic == "states") {
+            int port = int.parse(payload.split("-")[0].split("t")[1]) - 1;
+            setState(() {
+              portsStates[port] =
+                  payload.split("-")[1] == "on" ||
+                      payload.split("-")[1] == "True";
+            });
+          }
       }, onError: (error) => {print("Received error: " + error.toString())});
     }
     return client;

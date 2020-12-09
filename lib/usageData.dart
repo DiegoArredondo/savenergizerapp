@@ -21,18 +21,20 @@ class _DashboardPageState extends State<DashboardPage> {
   var checkedForUsageData = false;
   var checkedForSensorReadings = false;
 
-  var minTempAxis = 2400;
-  var maxTempAxis = 0;
+  DateTime minTempAxis = DateTime(5000);
+  DateTime maxTempAxis = DateTime(4);
 
   @override
   Widget build(BuildContext context) {
     var resp = Responsive.of(context);
 
+    var format = DateFormat('HHmm');
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: usageData.isNotEmpty && checkedForUsageData
+      body: usageData.isNotEmpty && checkedForUsageData && sensorReadings.isNotEmpty && checkedForSensorReadings
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -71,14 +73,18 @@ class _DashboardPageState extends State<DashboardPage> {
                       domainAxis: new charts.NumericAxisSpec(
                         // Set the initial viewport by providing a new AxisSpec with the
                         // desired viewport, in NumericExtents.
-                          viewport: new charts.NumericExtents(minTempAxis, maxTempAxis)),
+                          viewport: new charts.NumericExtents(
+                              int.parse(format.format(minTempAxis)),
+                              int.parse(format.format(maxTempAxis)),
+                          ),
+                      ),
                       // Optionally add a pan or pan and zoom behavior.
                       // If pan/zoom is not added, the viewport specified remains the viewport.
                       behaviors: [new charts.PanAndZoomBehavior()],
                     )),
               ],
             )
-          : usageData.isEmpty && checkedForUsageData
+          : usageData.isEmpty && checkedForUsageData && sensorReadings.isEmpty && checkedForSensorReadings
               ? Center(
                   child: Padding(
                       padding: EdgeInsets.all(resp.wp(5)),
@@ -137,7 +143,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 "port": element.data()['port'],
                 "timeTurnedOn": element.data()['timeTurnedOn'] as int,
                 "timeUsed": element.data()['timeUsed'] as int,
-                "timestamp": element.data()['timestamp'] as int
+                "timestamp": element.data()['timestamp'].runtimeType == int ? element.data()['timestamp'] : (element.data()['timestamp'] as Timestamp).millisecondsSinceEpoch
               });
               print("Usage data ready");
             });
@@ -164,11 +170,11 @@ class _DashboardPageState extends State<DashboardPage> {
               });
               print("Sensor readings ready");
 
-              minTempAxis = usageData[0]["timestamp"];
               sensorReadings.forEach((element) {
-                var t = element["value"];
-                if (t < minTempAxis) minTempAxis = t;
-                if (t > maxTempAxis) maxTempAxis = t;
+                print("checking minmax");
+                DateTime t = DateTime.fromMillisecondsSinceEpoch((element["timestamp"] as Timestamp).millisecondsSinceEpoch);
+                if (t.isBefore(minTempAxis)) minTempAxis = t;
+                if (t.isAfter(maxTempAxis)) maxTempAxis = t;
               });
               print("minTempAxis: " + minTempAxis.toString());
               print("maxTempAxis: " + maxTempAxis.toString());
@@ -290,8 +296,6 @@ class _DashboardPageState extends State<DashboardPage> {
     //sensorReadings
     //timestamp dateTme
     //value int
-    var format = DateFormat('HH:mm');
-
     final DateFormat formatter = DateFormat('HHmm');
 
     List<LinearReadings> data = [];
